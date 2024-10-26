@@ -16,6 +16,7 @@ Route::post('login', [AuthController::class, 'login']);
 
 // Api de especialidades
 Route::resource('especialidades', EspecialidadeController::class)->except(['create', 'edit']); // Solo API, no necesitamos 'create' y 'edit'
+Route::get('/especialidad/select', [EspecialidadeController::class, 'select' ]); //selet para las espeialidades
 
 // Api de pacentes
 Route::resource('pacientes', PacienteController::class);
@@ -34,8 +35,8 @@ Route::get('/medico/find/{id}', [MedicoController::class, 'find' ]);
 Route::resource('users', UserController::class)->except(['create', 'edit']); //crud para usuarios
 
 
-Route::get('/especialidad/select', [EspecialidadeController::class, 'select' ]);
 
+//Para pruebas no se hanm metido aún en las rutas protegidas
 
 // Rutas protegidas (requieren autenticación)
 Route::group(['middleware' => 'auth:sanctum'], function () {
