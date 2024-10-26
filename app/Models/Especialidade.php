@@ -5,20 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Class Paciente
+ * Class Especialidade
  *
  * @property $id
- * @property $nombre
- * @property $apellido
- * @property $dui
- * @property $fecha_nacimiento
+ * @property $name
  * @property $created_at
  * @property $updated_at
  *
  * @package App
  * @mixin \Illuminate\Database\Eloquent\Builder
  */
-class Paciente extends Model
+class Especialidade extends Model
 {
     
     protected $perPage = 20;
@@ -28,7 +25,6 @@ class Paciente extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['nombre', 'apellido', 'dui', 'fecha_nacimiento'];
-
-
+    protected $table = 'especialidades';
+    protected $fillable = ['name'];
 }
