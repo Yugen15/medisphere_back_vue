@@ -7,6 +7,7 @@ use App\Http\Controllers\EspecialidadeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MedicoController;
 use App\Http\Controllers\PacienteController;
+use App\Http\Controllers\CitaController;
 use App\Models\Paciente;
 
 // Rutas abiertas (sin autenticación)
@@ -33,6 +34,14 @@ Route::delete('/medico/delete/{id}', [MedicoController::class, 'delete' ]);
 Route::get('/medico/find/{id}', [MedicoController::class, 'find' ]);
 
 Route::resource('users', UserController::class)->except(['create', 'edit']); //crud para usuarios
+
+
+// Api Citas
+Route::get('citas', [CitaController::class, 'index']);
+Route::post('citas/create', [CitaController::class, 'store']);
+Route::put('citas/update/{id}', [CitaController::class, 'update']);
+Route::delete('citas/delete/{id}', [CitaController::class, 'delete']);
+Route::get('/citas/find/{id}', [MedicoController::class, 'find' ]);
 
 
 
