@@ -36,8 +36,10 @@
                                     <tr>
                                         <th>No</th>
                                         
-									<th >Cita Id</th>
+									<th >Fecha</th>
+									<th >Estado</th>
 									<th >Diagnostico</th>
+									<th >Id Cita</th>
 
                                         <th></th>
                                     </tr>
@@ -47,8 +49,10 @@
                                         <tr>
                                             <td>{{ ++$i }}</td>
                                             
-										<td >{{ $consulta->cita_id }}</td>
+										<td >{{ $consulta->fecha }}</td>
+										<td >{{ $consulta->estado }}</td>
 										<td >{{ $consulta->diagnostico }}</td>
+										<td >{{ $consulta->id_cita }}</td>
 
                                             <td>
                                                 <form action="{{ route('consultas.destroy', $consulta->id) }}" method="POST">

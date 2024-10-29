@@ -13,18 +13,59 @@ class CitaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-{
-    try {
-        $citas = Cita::with(['medico', 'paciente'])->get();
-        return response()->json($citas, 200);
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Error al obtener citas',
-            'error' => $e->getMessage()
-        ], 500);
+
+    public function select()
+    {
+        try {
+            $citas = Cita::with(['paciente', 'doctor'])
+                ->whereDoesntHave('consulta') // Solo citas sin consulta
+                ->get()
+                ->map(function ($cita) {
+                    return [
+                        'id' => $cita->id,
+                        'paciente' => [
+                            'nombre' => $cita->paciente->nombre,
+                            'apellido' => $cita->paciente->apellido,
+                            'dui' => $cita->paciente->dui
+                        ],
+                        'doctor' => [
+                            'nombre' => $cita->doctor->nombre,
+                            'apellido' => $cita->doctor->apellido
+                        ],
+                        'fecha' => $cita->date,
+                        'estado' => $cita->estado
+                    ];
+                });
+
+            if ($citas->isEmpty()) {
+                return response()->json([
+                    'code' => 404,
+                    'message' => 'No hay citas disponibles'
+                ], 404);
+            }
+
+            return response()->json($citas, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'code' => 500,
+                'message' => 'Error al cargar las citas',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-}
+
+    public function index()
+    {
+        try {
+            $citas = Cita::with(['medico', 'paciente'])->get();
+            return response()->json($citas, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al obtener citas',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -45,15 +86,26 @@ class CitaController extends Controller
             // Puedes agregar la creación de una consulta aquí si es necesario
             // $consulta = Consulta::create([...]);
 
+            $consulta = Consulta::create([
+                'id_cita' => $cita->id,
+                'fecha' => $cita->date,
+                'estado' => $cita->estado,
+                'diagnostico' => null, // Este se puede establecer más tarde
+                // No establecemos 'deleted_at' ya que se maneja automáticamente
+            ]);
+
             return response()->json([
                 'code' => 201,
-                'message' => 'Cita creada exitosamente',
-                'data' => $cita
+                'message' => 'Cita y consulta creadas exitosamente',
+                'data' => [
+                    'cita' => $cita,
+                    'consulta' => $consulta
+                ]
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
                 'code' => 500,
-                'message' => 'Error al crear la cita',
+                'message' => 'Error al crear la cita y la consulta',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -130,41 +182,40 @@ class CitaController extends Controller
 
 
     public function find($id)
-{
-    try {
-        // Se busca la cita
-        $cita = Cita::find($id);
-        if ($cita) {
-            // Si la cita existe se retornan sus datos
-            $datos = Cita::select(
-                'citas.id',
-                'citas.title',
-                'citas.date',
-                'citas.estado',
-                'pacientes.nombre as paciente_nombre',
-                'pacientes.apellido as paciente_apellido',
-                'medicos.nombre as doctor_nombre',
-                'medicos.apellido as doctor_apellido'
-            )
-            ->join('pacientes', 'pacientes.id', '=', 'citas.paciente_id')
-            ->join('medicos', 'medicos.id', '=', 'citas.doctor_id')
-            ->where('citas.id', '=', $id)
-            ->get();
+    {
+        try {
+            // Se busca la cita
+            $cita = Cita::find($id);
+            if ($cita) {
+                // Si la cita existe se retornan sus datos
+                $datos = Cita::select(
+                    'citas.id',
+                    'citas.title',
+                    'citas.date',
+                    'citas.estado',
+                    'pacientes.nombre as paciente_nombre',
+                    'pacientes.apellido as paciente_apellido',
+                    'medicos.nombre as doctor_nombre',
+                    'medicos.apellido as doctor_apellido'
+                )
+                    ->join('pacientes', 'pacientes.id', '=', 'citas.paciente_id')
+                    ->join('medicos', 'medicos.id', '=', 'citas.doctor_id')
+                    ->where('citas.id', '=', $id)
+                    ->get();
 
-            return response()->json([
-                'code' => 200,
-                'data' => $datos[0]
-            ], 200);
-        } else {
-            // Si la cita no existe se devuelve un mensaje
-            return response()->json([
-                'code' => 404,
-                'data' => 'Cita no encontrada'
-            ], 404);
+                return response()->json([
+                    'code' => 200,
+                    'data' => $datos[0]
+                ], 200);
+            } else {
+                // Si la cita no existe se devuelve un mensaje
+                return response()->json([
+                    'code' => 404,
+                    'data' => 'Cita no encontrada'
+                ], 404);
+            }
+        } catch (\Throwable $th) {
+            return response()->json($th->getMessage(), 500);
         }
-    } catch (\Throwable $th) {
-        return response()->json($th->getMessage(), 500);
     }
-}
-
 }

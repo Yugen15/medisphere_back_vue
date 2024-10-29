@@ -8,6 +8,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\MedicoController;
 use App\Http\Controllers\PacienteController;
 use App\Http\Controllers\CitaController;
+use App\Http\Controllers\ConsultaController;
 use App\Models\Paciente;
 
 // Rutas abiertas (sin autenticación)
@@ -36,12 +37,22 @@ Route::get('/medico/find/{id}', [MedicoController::class, 'find' ]);
 Route::resource('users', UserController::class)->except(['create', 'edit']); //crud para usuarios
 
 
-// Api Citas
+// Api citas
+Route::get('/cita/select', [CitaController::class, 'select' ]);
 Route::get('citas', [CitaController::class, 'index']);
 Route::post('citas/create', [CitaController::class, 'store']);
 Route::put('citas/update/{id}', [CitaController::class, 'update']);
 Route::delete('citas/delete/{id}', [CitaController::class, 'delete']);
-Route::get('/citas/find/{id}', [MedicoController::class, 'find' ]);
+Route::get('/citas/find/{id}', [CitaController::class, 'find' ]);
+
+
+// Api 
+Route::get('consultas', [ConsultaController::class, 'index']);
+Route::get('consulta/select', [ConsultaController::class, 'select']);
+Route::post('consultas/create', [ConsultaController::class, 'store']);
+Route::put('consultas/update/{id}', [ConsultaController::class, 'update']);
+Route::delete('consultas/delete/{id}', [ConsultaController::class, 'delete']);
+Route::get('consultas/find/{id}', [ConsultaController::class, 'find']);
 
 
 

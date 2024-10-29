@@ -21,12 +21,20 @@
                     <div class="card-body bg-white">
                         
                                 <div class="form-group mb-2 mb20">
-                                    <strong>Cita Id:</strong>
-                                    {{ $consulta->cita_id }}
+                                    <strong>Fecha:</strong>
+                                    {{ $consulta->fecha }}
+                                </div>
+                                <div class="form-group mb-2 mb20">
+                                    <strong>Estado:</strong>
+                                    {{ $consulta->estado }}
                                 </div>
                                 <div class="form-group mb-2 mb20">
                                     <strong>Diagnostico:</strong>
                                     {{ $consulta->diagnostico }}
+                                </div>
+                                <div class="form-group mb-2 mb20">
+                                    <strong>Id Cita:</strong>
+                                    {{ $consulta->id_cita }}
                                 </div>
 
                     </div>

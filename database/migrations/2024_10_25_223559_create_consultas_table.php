@@ -1,33 +1,36 @@
 <?php
 
-use App\Models\Cita;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateConsultasTable extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('consultas', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('cita_id'); // Relación con citas
-            $table->text('diagnostico')->nullable(); // Diagnóstico general de la consulta
+            $table->date('fecha');
+            $table->string('estado', 50)->nullable();
+            $table->text('diagnostico')->nullable();
+            $table->foreignId('id_cita')->unique()->constrained('citas')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
-
-            // Relación con citas (foreign key)
-            $table->foreign('cita_id')->references('id')->on('citas')->onDelete('cascade');
+            $table->softDeletes();
         });
     }
 
     /**
      * Reverse the migrations.
+     *
+     * @return void
      */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('consultas');
     }
-};
+}

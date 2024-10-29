@@ -2,33 +2,32 @@
 
 namespace App\Models;
 
-use App\Models\Cita;
-use App\Models\Examen;
-use App\Models\Receta;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Consulta extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    protected $fillable = ['cita_id', 'diagnostico'];
+    protected $fillable = [
+        'fecha', 'estado', 'diagnostico', 'id_cita'
+    ];
 
-    // Relación con Cita
     public function cita()
     {
-        return $this->belongsTo(Cita::class);
+        return $this->belongsTo(Cita::class, 'id_cita');
     }
 
-    // Relación con Recetas (una consulta puede tener muchas recetas)
-    // public function recetas()
-    // {
-    //     return $this->hasMany(Receta::class);
-    // }
+    public function paciente()
+    {
+        // Aquí utilizamos la relación cita para acceder al paciente
+        return $this->cita->belongsTo(Paciente::class, 'paciente_id');
+    }
 
-    // // Relación con Exámenes (una consulta puede tener muchos exámenes)
-    // public function examenes()
-    // {
-    //     return $this->hasMany(Examen::class);
-    // }
+    public function doctor()
+    {
+        // Aquí utilizamos la relación cita para acceder al médico
+        return $this->cita->belongsTo(Medico::class, 'doctor_id');
+    }
 }
