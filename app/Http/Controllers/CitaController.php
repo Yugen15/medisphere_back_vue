@@ -17,20 +17,21 @@ class CitaController extends Controller
     public function select()
     {
         try {
-            $citas = Cita::with(['paciente', 'doctor'])
-                ->whereDoesntHave('consulta') // Solo citas sin consulta
+            $citas = Cita::with(['paciente', 'doctor', 'consulta'])
+                ->whereHas('consulta', function ($query) {
+                    $query->where('estado', 'Completada');
+                })
                 ->get()
                 ->map(function ($cita) {
                     return [
                         'id' => $cita->id,
                         'paciente' => [
-                            'nombre' => $cita->paciente->nombre,
-                            'apellido' => $cita->paciente->apellido,
+                            'nombre' => $cita->paciente->nombre . ' ' . $cita->paciente->apellido,
                             'dui' => $cita->paciente->dui
                         ],
                         'doctor' => [
-                            'nombre' => $cita->doctor->nombre,
-                            'apellido' => $cita->doctor->apellido
+                            'nombre' => $cita->doctor->nombre . ' ' . $cita->doctor->apellido,
+                            'especialidad' => $cita->doctor->especialidad
                         ],
                         'fecha' => $cita->date,
                         'estado' => $cita->estado
@@ -44,7 +45,10 @@ class CitaController extends Controller
                 ], 404);
             }
 
-            return response()->json($citas, 200);
+            return response()->json([
+                'code' => 200,
+                'data' => $citas
+            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'code' => 500,
