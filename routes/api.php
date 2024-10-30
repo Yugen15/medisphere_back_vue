@@ -9,6 +9,7 @@ use App\Http\Controllers\MedicoController;
 use App\Http\Controllers\PacienteController;
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\ConsultaController;
+use App\Http\Controllers\RecetaController;
 use App\Models\Paciente;
 
 // Rutas abiertas (sin autenticación)
@@ -53,6 +54,14 @@ Route::post('consultas/create', [ConsultaController::class, 'store']);
 Route::put('consultas/update/{id}', [ConsultaController::class, 'update']);
 Route::delete('consultas/delete/{id}', [ConsultaController::class, 'delete']);
 Route::get('consultas/find/{id}', [ConsultaController::class, 'find']);
+
+
+// Api receta
+Route::get('/consultas/{consultaId}/recetas', [RecetaController::class, 'getByConsulta']);
+Route::post('/recetas', [RecetaController::class, 'store']);
+Route::put('/recetas/{id}', [RecetaController::class, 'update']);
+Route::delete('/recetas/{id}', [RecetaController::class, 'destroy']);
+
 
 
 
