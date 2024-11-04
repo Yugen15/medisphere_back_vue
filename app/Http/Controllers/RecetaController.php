@@ -5,10 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Receta;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\Response;
+
+
 
 
 class RecetaController extends Controller
@@ -156,6 +160,56 @@ class RecetaController extends Controller
                 'message' => 'Error al eliminar la receta',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+    public function generateReport($id)
+    {
+        try {
+            // Obtener recetas, detalles del paciente y médico
+            $recetas = DB::table('pacientes AS p')
+                ->join('citas AS c', 'p.id', '=', 'c.paciente_id')
+                ->join('consultas AS consulta', 'consulta.id_cita', '=', 'c.id')
+                ->join('recetas AS receta', 'receta.id_consulta', '=', 'consulta.id')
+                ->join('medicos AS medico', 'medico.id', '=', 'c.doctor_id')
+                ->select(
+                    'p.nombre AS nombre_paciente',
+                    'p.apellido AS apellido_paciente',
+                    'medico.nombre AS nombre_medico',
+                    'medico.apellido AS apellido_medico',
+                    'consulta.fecha AS fecha_consulta',
+                    'receta.medicamento',
+                    'receta.dosis'
+                )
+                ->where('p.id', $id)
+                ->orderBy('consulta.fecha', 'DESC')
+                ->get();
+
+            if ($recetas->isEmpty()) {
+                return response()->json(['message' => 'No se encontraron recetas para este paciente'], 404);
+            }
+
+            // Generar el PDF
+            $pdf = PDF::loadView('recetas_por_paciente', compact('recetas'));
+
+            // Configurar headers específicos para la descarga del PDF
+            return $pdf->stream('recetas_paciente_' . $id . '.pdf', [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="recetas_paciente_' . $id . '.pdf"',
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                'Pragma' => 'no-cache',
+                'Expires' => '0'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error generando reporte de recetas:', [
+                'patient_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'Error al generar el PDF',
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

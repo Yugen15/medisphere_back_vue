@@ -18,6 +18,12 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::resource('users', UserController::class)->except(['create', 'edit']); //crud para usuarios
 
+//Para el reporte de paciente
+Route::get('paciente/reporte/{id}', [PacienteController::class, 'generateReport'])->name('paciente.reporte');
+
+//Para el reporte de receta por paciente y por fecha
+Route::get('receta/reporte/{id}', [RecetaController::class, 'generateReport'])->name('receta.reporte');
+
 
 
 // Rutas protegidas (requieren autenticación)
@@ -35,6 +41,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/paciente/select', [PacienteController::class, 'select']);
     Route::put('/paciente/update/{id}', [PacienteController::class, 'update']);
     Route::delete('/paciente/delete/{id}', [PacienteController::class, 'delete']);
+
+    
 
     // Api de médicos
     Route::get('/medico/select', [MedicoController::class, 'select']);

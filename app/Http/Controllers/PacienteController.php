@@ -9,6 +9,9 @@ use App\Http\Requests\PacienteRequest;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Validator;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
+
 
 class PacienteController extends Controller
 {
@@ -169,5 +172,36 @@ class PacienteController extends Controller
         } catch (\Throwable $th) {
             return response()->json($th->getMessage(), 500);
         }
+    }
+    public function generateReport($id)
+    {
+        // Realizar la consulta con joins para obtener los datos del expediente del paciente
+        $expediente = DB::table('pacientes as p')
+            ->leftJoin('citas as c', 'p.id', '=', 'c.paciente_id')
+            ->leftJoin('consultas as consulta', 'consulta.id_cita', '=', 'c.id')
+            ->leftJoin('recetas as receta', 'receta.id_consulta', '=', 'consulta.id')
+            ->leftJoin('examenes as examen', 'examen.id_consulta', '=', 'consulta.id')
+            ->select(
+                'p.nombre as nombre_paciente',
+                'p.apellido as apellido_paciente',
+                'p.dui as dui_paciente',
+                'c.title as titulo_cita',
+                'c.date as fecha_cita',
+                'consulta.estado',
+                'consulta.diagnostico as diagnostico_consulta',
+                'receta.medicamento as medicamento',
+                'examen.tipo as tipo_examen',
+                'examen.resultado as resultado_examen'
+            )
+            ->where('p.id', '=', $id)
+            ->orderBy('c.date', 'DESC')
+            ->orderBy('consulta.created_at', 'DESC')
+            ->get();
+
+        // Generar el PDF usando la vista creada para el reporte
+        $pdf = PDF::loadView('paciente.reporte', ['expediente' => $expediente]);
+
+        // Descargar el PDF con un nombre específico
+        return $pdf->download('expediente_paciente.pdf');
     }
 }
