@@ -42,7 +42,7 @@ class MedicoController extends Controller
         try {
             // Se valida que todos los campos sean requeridos
             $validacion = Validator::make($request->all(), [
-                'nombre' => 'required',
+                'nombre' => 'required':100,
                 'apellido' => 'required',
                 'id_especialidad' => 'required'
             ]);
